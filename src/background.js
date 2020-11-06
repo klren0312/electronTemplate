@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, Tray, Menu, protocol, BrowserWindow } from 'electron'
+import { app, Tray, Menu, MenuItem, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 // import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -41,7 +41,12 @@ async function createWindow () {
 function createTray () {
   tray = new Tray('./public/favicon.ico')
   const contextMenu = Menu.buildFromTemplate([
-    { label: '退出程序', type: 'normal' }
+    new MenuItem({
+      label: '退出程序',
+      click: () => {
+        app.exit()
+      }
+    })
   ])
   tray.setToolTip('This is my application')
   tray.setContextMenu(contextMenu)
