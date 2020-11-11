@@ -14,16 +14,18 @@ protocol.registerSchemesAsPrivileged([
 let win = null
 // 托盘
 let tray = null
+// 是否关闭
+let isQuit = false
 
 async function createWindow () {
+  Menu.setApplicationMenu(null) // 隐藏菜单
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: true, // 渲染层可以使用node
+      webSecurity: false // 跨域
     }
   })
 
@@ -36,14 +38,39 @@ async function createWindow () {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+
+  // 窗口最小化触发
+  win.on('minimize', () => {
+    console.log('最小化')
+  })
+
+  // 窗口隐藏, 任务栏没有图标
+  win.on('hide', () => {
+    console.log('窗口隐藏')
+  })
+
+  // 窗口关闭触发
+  // 若isQuit为false, 则不退出, 只是缩小到托盘
+  win.on('close', e => {
+    if (isQuit) {
+      win = null
+    } else {
+      e.preventDefault()
+      win.hide()
+    }
+  })
 }
 
+/**
+ * 创建托盘
+ */
 function createTray () {
   tray = new Tray('./public/favicon.ico')
   const contextMenu = Menu.buildFromTemplate([
     new MenuItem({
       label: '退出程序',
       click: () => {
+        isQuit = true
         app.exit()
       }
     })
