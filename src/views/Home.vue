@@ -9,8 +9,13 @@
 
 <script>
 let BrowserWindow = null
+let screenWidth = 0
+let screenHeight = 0
 if (process.env.IS_ELECTRON) {
   BrowserWindow = require('electron').remote.BrowserWindow
+  const screen = require('electron').remote.screen
+  screenWidth = screen.getPrimaryDisplay().workAreaSize.width
+  screenHeight = screen.getPrimaryDisplay().workAreaSize.height
 }
 export default {
   name: 'Home',
@@ -25,7 +30,9 @@ export default {
       if (process.env.IS_ELECTRON) {
         const childWindow = new BrowserWindow({
           width: 200,
-          height: 400,
+          height: 200,
+          x: screenWidth - 200,
+          y: screenHeight - 200,
           focusable: true, // 聚焦
           frame: false, // 无外框架
           transparent: true, // 透明

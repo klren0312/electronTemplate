@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, Tray, Menu, MenuItem, protocol, BrowserWindow } from 'electron'
+import { app, Tray, Menu, MenuItem, protocol, screen, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 // import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -64,9 +64,35 @@ async function createWindow () {
 /**
  * 创建托盘
  */
+let childWindow = null
 function createTray () {
   tray = new Tray('./public/favicon.ico')
   const contextMenu = Menu.buildFromTemplate([
+    new MenuItem({
+      label: '弹小框',
+      click: () => {
+        const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
+        const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
+        childWindow = new BrowserWindow({
+          width: 200,
+          height: 200,
+          x: screenWidth - 200,
+          y: screenHeight - 200,
+          focusable: true, // 聚焦
+          frame: false, // 无外框架
+          transparent: true, // 透明
+          maximizable: false, // 不可缩放
+          webPreferences: {
+            nodeIntegration: true
+          }
+        })
+        const url = process.env.NODE_ENV === 'development'
+          ? 'http://localhost:11111'
+          : `file://${__dirname}/index.html`
+        childWindow.loadURL(url + '/#/single')
+        childWindow.setAlwaysOnTop(true) // 放在顶层固定
+      }
+    }),
     new MenuItem({
       label: '退出程序',
       click: () => {
@@ -79,11 +105,7 @@ function createTray () {
   tray.setContextMenu(contextMenu)
 
   tray.on('click', () => {
-    if (!win.isVisible()) {
-      win.show()
-    } else {
-      win.hide()
-    }
+    win.show()
   })
 }
 
@@ -116,6 +138,11 @@ app.on('ready', async () => {
   }
   createWindow()
   createTray()
+})
+
+
+ipcMain.on('closeChildWin', (e, arg) => {
+  childWindow.close()
 })
 
 // Exit cleanly on request from parent process in development mode.
