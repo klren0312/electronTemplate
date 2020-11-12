@@ -64,10 +64,14 @@ async function createWindow () {
 /**
  * 创建托盘
  */
+const path = require('path')
 let childWindow = null
 function createTray () {
-  tray = new Tray('./public/favicon.ico')
+  tray = new Tray(path.resolve(__static, 'logo.png'))
   const contextMenu = Menu.buildFromTemplate([
+    new MenuItem({label: '显示主程序', click: () => {
+      win.show()
+    }}),
     new MenuItem({
       label: '弹小框',
       click: () => {
