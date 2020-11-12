@@ -16,6 +16,8 @@ let win = null
 let tray = null
 // 是否关闭
 let isQuit = false
+// 小窗口
+let childWindow = null
 
 async function createWindow () {
   Menu.setApplicationMenu(null) // 隐藏菜单
@@ -42,11 +44,23 @@ async function createWindow () {
   // 窗口最小化触发
   win.on('minimize', () => {
     console.log('最小化')
+    createChildWin()
+  })
+
+  win.on('focus', () => {
+    console.log('聚焦')
+    closeChildWin()
   })
 
   // 窗口隐藏, 任务栏没有图标
   win.on('hide', () => {
-    console.log('窗口隐藏')
+    console.log('隐藏')
+    createChildWin()
+  })
+
+  win.on('show', () => {
+    console.log('显示')
+    closeChildWin()
   })
 
   // 窗口关闭触发
@@ -65,7 +79,6 @@ async function createWindow () {
  * 创建托盘
  */
 const path = require('path')
-let childWindow = null
 function createTray () {
   tray = new Tray(path.resolve(__static, 'logo.png'))
   const contextMenu = Menu.buildFromTemplate([
@@ -75,26 +88,7 @@ function createTray () {
     new MenuItem({
       label: '弹小框',
       click: () => {
-        const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
-        const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
-        childWindow = new BrowserWindow({
-          width: 200,
-          height: 200,
-          x: screenWidth - 200,
-          y: screenHeight - 200,
-          focusable: true, // 聚焦
-          frame: false, // 无外框架
-          transparent: true, // 透明
-          maximizable: false, // 不可缩放
-          webPreferences: {
-            nodeIntegration: true
-          }
-        })
-        const url = process.env.NODE_ENV === 'development'
-          ? 'http://localhost:11111'
-          : `file://${__dirname}/index.html`
-        childWindow.loadURL(url + '/#/single')
-        childWindow.setAlwaysOnTop(true) // 放在顶层固定
+        createChildWin()
       }
     }),
     new MenuItem({
@@ -111,6 +105,40 @@ function createTray () {
   tray.on('click', () => {
     win.show()
   })
+}
+
+/**
+ * 创建小窗口
+ */
+function createChildWin () {
+  const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
+  const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
+  childWindow = new BrowserWindow({
+    width: 200,
+    height: 200,
+    x: screenWidth - 200,
+    y: screenHeight - 200,
+    focusable: true, // 聚焦
+    frame: false, // 无外框架
+    transparent: true, // 透明
+    maximizable: false, // 不可缩放
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
+  const url = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:11111'
+    : `file://${__dirname}/index.html`
+  childWindow.loadURL(url + '/#/single')
+  childWindow.setAlwaysOnTop(true) // 放在顶层固定
+}
+
+/**
+ * 关闭小窗口
+ */
+function closeChildWin () {
+  childWindow.close()
+  childWindow = null
 }
 
 // Quit when all windows are closed.
@@ -146,7 +174,7 @@ app.on('ready', async () => {
 
 
 ipcMain.on('closeChildWin', (e, arg) => {
-  childWindow.close()
+  closeChildWin()
 })
 
 // Exit cleanly on request from parent process in development mode.
