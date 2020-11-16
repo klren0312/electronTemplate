@@ -172,6 +172,21 @@ app.on('ready', async () => {
   createTray()
 })
 
+// 只允许单个实例
+// https://www.electronjs.org/docs/api/app#apprequestsingleinstancelock
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (win) {
+      if (win.isMinimized()) {
+        win.restore()
+      }
+      win.focus()
+    }
+  })
+}
 
 ipcMain.on('closeChildWin', (e, arg) => {
   closeChildWin()
