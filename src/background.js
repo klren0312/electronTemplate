@@ -28,7 +28,8 @@ async function createWindow () {
     webPreferences: {
       nodeIntegration: true, // 渲染层可以使用node
       webSecurity: false // 跨域
-    }
+    },
+    icon: path.resolve(__static, 'logo.png')
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -124,7 +125,8 @@ function createChildWin () {
     maximizable: false, // 不可缩放
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    icon: path.resolve(__static, 'logo.png')
   })
   const url = process.env.NODE_ENV === 'development'
     ? 'http://localhost:11111'
