@@ -126,6 +126,7 @@ function createChildWin () {
     webPreferences: {
       nodeIntegration: true
     },
+    skipTaskbar: true,
     icon: path.resolve(__static, 'logo.png')
   })
   const url = process.env.NODE_ENV === 'development'
