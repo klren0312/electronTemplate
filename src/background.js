@@ -2,6 +2,7 @@
 
 import { app, Tray, Menu, MenuItem, protocol, screen, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
+const path = require('path')
 // import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -9,6 +10,19 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
+
+// 设置调用协议
+// remove so we can register each time as we run the app. 
+app.removeAsDefaultProtocolClient('app');
+
+// If we are running a non-packaged version of the app && on windows
+if(process.env.NODE_ENV === 'development' && process.platform === 'win32') {
+  // Set the path of electron.exe and your app.
+  // These two additional parameters are only available on windows.
+  app.setAsDefaultProtocolClient('app', process.execPath, [path.resolve(process.argv[1])]);        
+} else {
+  app.setAsDefaultProtocolClient('app');
+}
 
 // 窗口
 let win = null
@@ -79,7 +93,6 @@ async function createWindow () {
 /**
  * 创建托盘
  */
-const path = require('path')
 function createTray () {
   tray = new Tray(path.resolve(__static, 'logo.png'))
   const contextMenu = Menu.buildFromTemplate([
@@ -148,8 +161,10 @@ function createChildWin () {
  * 关闭小窗口
  */
 function closeChildWin () {
-  childWindow.close()
-  childWindow = null
+  if (childWindow) {
+    childWindow.close()
+    childWindow = null
+  }
 }
 
 // Quit when all windows are closed.
@@ -189,14 +204,42 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 } else {
-  app.on('second-instance', () => {
-    if (win) {
-      if (win.isMinimized()) {
-        win.restore()
+  app.on('second-instance', (event, argv) => {
+    if (process.platform === 'win32') {
+      console.log("window 准备执行网页端调起客户端逻辑")
+      if (win) {
+        if (win.isMinimized()) {
+          win.restore()
+        }
+        win.focus()
       }
-      win.focus()
+      console.log(argv)
+      handleArgvFromWeb(argv)
     }
   })
+}
+
+const PROTOCOL = 'app' // 用户自定义
+// window 系统中执行网页调起应用时，处理协议传入的参数
+const handleArgvFromWeb = (argv) => {
+  const url = argv.find(v => v.indexOf(`${PROTOCOL}://`) !== -1)
+  console.log(url)
+  if (url) handleUrlFromWeb(url)
+}
+
+// 进行处理网页传来 url 参数，参数自定义，以下为示例
+// 示例调起应用的 url 为 app://?name=名字&type=类型&shareId=1585876954860136091
+const handleUrlFromWeb = (urlStr) => {
+  console.log(urlStr)
+  const urlObj = new URL(urlStr)
+  const { searchParams } = urlObj
+  const shareId = searchParams.get('shareId')
+  const name = searchParams.get('name')
+  const type = searchParams.get('type')
+  console.log(shareId)
+  /** code
+    这部分代码为使用这些参数执行相应的逻辑
+  */
 }
 
 ipcMain.on('closeChildWin', (e, arg) => {
