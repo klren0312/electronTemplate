@@ -228,15 +228,13 @@ const handleArgvFromWeb = (argv) => {
 }
 
 // 进行处理网页传来 url 参数，参数自定义，以下为示例
-// 示例调起应用的 url 为 app://?name=名字&type=类型&shareId=1585876954860136091
+// 示例调起应用的 url 为 app://?token=205bdf49hc97ch4146h8124h8281a81fdcdb
 const handleUrlFromWeb = (urlStr) => {
   console.log(urlStr)
   const urlObj = new URL(urlStr)
   const { searchParams } = urlObj
-  const shareId = searchParams.get('shareId')
-  const name = searchParams.get('name')
-  const type = searchParams.get('type')
-  console.log(shareId)
+  const token = searchParams.get('token')
+  console.log(token)
   /** code
     这部分代码为使用这些参数执行相应的逻辑
   */
