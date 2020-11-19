@@ -5,7 +5,13 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      win: {
+        target: 'nsis'
+      },
+      nsis: {
+        perMachine: true
+      }
     }
   }
 }

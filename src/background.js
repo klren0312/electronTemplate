@@ -5,7 +5,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const path = require('path')
 // import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
+const URLSCHEME = 'testapp' // 用户自定义 URL SCHEME
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -13,15 +13,15 @@ protocol.registerSchemesAsPrivileged([
 
 // 设置调用协议
 // remove so we can register each time as we run the app. 
-app.removeAsDefaultProtocolClient('app');
+app.removeAsDefaultProtocolClient(URLSCHEME);
 
 // If we are running a non-packaged version of the app && on windows
 if(process.env.NODE_ENV === 'development' && process.platform === 'win32') {
   // Set the path of electron.exe and your app.
   // These two additional parameters are only available on windows.
-  app.setAsDefaultProtocolClient('app', process.execPath, [path.resolve(process.argv[1])]);        
+  app.setAsDefaultProtocolClient(URLSCHEME, process.execPath, [path.resolve(process.argv[1])]);        
 } else {
-  app.setAsDefaultProtocolClient('app');
+  app.setAsDefaultProtocolClient(URLSCHEME);
 }
 
 // 窗口
@@ -36,15 +36,20 @@ let childWindow = null
 async function createWindow () {
   Menu.setApplicationMenu(null) // 隐藏菜单
   // Create the browser window.
+  const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
+  const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
   win = new BrowserWindow({
-    width: 800,
+    width: 330,
     height: 600,
+    x: screenWidth - 330,
+    y: screenHeight - 600,
     webPreferences: {
       nodeIntegration: true, // 渲染层可以使用node
       webSecurity: false // 跨域
     },
     icon: path.resolve(__static, 'logo.png')
   })
+  win.setAlwaysOnTop(true)
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -203,32 +208,35 @@ app.on('ready', async () => {
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
-} else {
-  app.on('second-instance', (event, argv) => {
-    if (process.platform === 'win32') {
-      console.log("window 准备执行网页端调起客户端逻辑")
-      if (win) {
-        if (win.isMinimized()) {
-          win.restore()
-        }
-        win.focus()
-      }
-      console.log(argv)
-      handleArgvFromWeb(argv)
-    }
-  })
 }
 
-const PROTOCOL = 'app' // 用户自定义
+app.on('second-instance', (event, argv) => {
+  if (process.platform === 'win32') {
+    console.log("window 准备执行网页端调起客户端逻辑")
+    if (win) {
+      if (win.isMinimized()) {
+        win.restore()
+      }
+      if (win.isVisible()) {
+        win.focus()
+      } else {
+        win.show()
+      }
+    }
+    handleArgvFromWeb(argv)
+  }
+})
+
+
 // window 系统中执行网页调起应用时，处理协议传入的参数
 const handleArgvFromWeb = (argv) => {
-  const url = argv.find(v => v.indexOf(`${PROTOCOL}://`) !== -1)
+  const url = argv.find(v => v.indexOf(`${URLSCHEME}://`) !== -1)
   console.log(url)
   if (url) handleUrlFromWeb(url)
 }
 
 // 进行处理网页传来 url 参数，参数自定义，以下为示例
-// 示例调起应用的 url 为 app://?token=205bdf49hc97ch4146h8124h8281a81fdcdb
+// 示例调起应用的 url 为 testapp://?token=205bdf49hc97ch4146h8124h8281a81fdcdb
 const handleUrlFromWeb = (urlStr) => {
   console.log(urlStr)
   const urlObj = new URL(urlStr)
