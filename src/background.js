@@ -242,6 +242,7 @@ const handleUrlFromWeb = (urlStr) => {
   const urlObj = new URL(urlStr)
   const { searchParams } = urlObj
   const token = searchParams.get('token')
+  win.webContents.send('token', token)
   console.log(token)
   /** code
     这部分代码为使用这些参数执行相应的逻辑
