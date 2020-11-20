@@ -16,7 +16,13 @@
 !macroend
 
 !macro customInstall
-
+  DetailPrint 'Register testapp URI Handler'
+  DeleteRegKey HKCR 'testapp'
+  WriteRegStr HKCR 'testapp' '' 'URL:testapp'
+  WriteRegStr HKCR 'testapp' 'URL Protocol' ''
+  WriteRegStr HKCR 'testapp\shell' '' ''
+  WriteRegStr HKCR 'testapp\shell\Open' '' ''
+  WriteRegStr HKCR 'testapp\shell\Open\command' '' '$INSTDIR\${APP_EXECUTABLE_FILENAME} %1'
 !macroend
 
 !macro customInstallMode
