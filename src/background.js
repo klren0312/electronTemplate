@@ -1,6 +1,15 @@
 'use strict'
 
-import { app, Tray, Menu, MenuItem, protocol, screen, BrowserWindow, ipcMain } from 'electron'
+import {
+  app,
+  Tray,
+  Menu,
+  MenuItem,
+  protocol,
+  screen,
+  BrowserWindow,
+  ipcMain
+} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const path = require('path')
 // import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -55,10 +64,18 @@ async function createWindow () {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) win.webContents.openDevTools()
+    require('./server')
   } else {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
+    require('./server')
+    // 新实例, 判断是否是通过URL SCHEME打开, 如果是则获取数据
+    const argv = process.argv
+    const string = argv[argv.length - 1]
+    if (string.indexOf(URLSCHEME + '://') > -1) {
+      handleUrlFromWeb(string)
+    }
   }
 
   // 窗口最小化触发
@@ -208,25 +225,24 @@ app.on('ready', async () => {
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
-}
-
-app.on('second-instance', (event, argv) => {
-  if (process.platform === 'win32') {
-    console.log("window 准备执行网页端调起客户端逻辑")
-    if (win) {
-      if (win.isMinimized()) {
-        win.restore()
+} else {
+  app.on('second-instance', (event, argv) => {
+    if (process.platform === 'win32') {
+      console.log("window 准备执行网页端调起客户端逻辑")
+      if (win) {
+        if (win.isMinimized()) {
+          win.restore()
+        }
+        if (win.isVisible()) {
+          win.focus()
+        } else {
+          win.show()
+        }
       }
-      if (win.isVisible()) {
-        win.focus()
-      } else {
-        win.show()
-      }
+      handleArgvFromWeb(argv)
     }
-    handleArgvFromWeb(argv)
-  }
-})
-
+  })
+}
 
 // window 系统中执行网页调起应用时，处理协议传入的参数
 const handleArgvFromWeb = (argv) => {
@@ -244,9 +260,6 @@ const handleUrlFromWeb = (urlStr) => {
   const token = searchParams.get('token')
   win.webContents.send('token', token)
   console.log(token)
-  /** code
-    这部分代码为使用这些参数执行相应的逻辑
-  */
 }
 
 ipcMain.on('closeChildWin', (e, arg) => {

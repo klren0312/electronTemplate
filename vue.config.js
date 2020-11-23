@@ -29,6 +29,7 @@ module.exports = {
           allowToChangeInstallationDirectory: true, // 允许更改安装目录
           createDesktopShortcut: true, // 创建桌面图标
           createStartMenuShortcut: true, // 创建开始菜单
+          deleteAppDataOnUninstall: true, // 卸载时清除应用数据
           include: './public/nsis/installer.nsh', // 包含的脚本
           guid: '53fe4cba-120d-4851-3cdc-dccb3a469019' // 软件guid
         },
