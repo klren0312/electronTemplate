@@ -85,6 +85,7 @@ async function createWindow () {
   })
 
   win.on('focus', () => {
+    flashTray(false)
     console.log('聚焦')
     closeChildWin()
   })
@@ -96,6 +97,7 @@ async function createWindow () {
   })
 
   win.on('show', () => {
+    flashTray(false)
     console.log('显示')
     closeChildWin()
   })
@@ -149,6 +151,27 @@ function createTray () {
       win.show()
     }
   })
+}
+/**
+ * 闪烁
+ */
+let flashInterval
+function flashTray (bool) {
+  win.flashFrame(bool)
+  if (!bool) {
+    flashInterval && clearInterval(flashInterval)
+    tray.setImage(path.resolve(__static, 'logo.png'))
+    return
+  }
+  flashInterval && clearInterval(flashInterval)
+  var count = 0
+  flashInterval = setInterval(function() {
+    if (count++ % 2 == 0) {
+      tray.setImage(path.resolve(__static, 'empty.png'))
+    } else {
+      tray.setImage(path.resolve(__static, 'logo.png'))
+    }
+  }, 400)
 }
 
 /**
@@ -264,6 +287,10 @@ const handleUrlFromWeb = (urlStr) => {
 
 ipcMain.on('closeChildWin', (e, arg) => {
   closeChildWin()
+})
+
+ipcMain.on('flashTray', (e, arg) => {
+  flashTray(arg)
 })
 
 // Exit cleanly on request from parent process in development mode.

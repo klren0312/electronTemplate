@@ -6,10 +6,14 @@
   <div class="home">
     this is home
   </div>
+  <div>
+    <button @click="flash">闪烁</button>
+  </div>
 </div>
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 let Dialog = null
 if (process.env.IS_ELECTRON) {
   Dialog = require('electron').remote.dialog
@@ -30,6 +34,9 @@ export default {
         title: '测试弹框',
         message: 'testtesttesttesttest'
       })
+    },
+    flash() {
+      ipcRenderer.send('flashTray', true)
     }
   }
 }
