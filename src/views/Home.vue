@@ -35,7 +35,7 @@ export default {
         message: 'testtesttesttesttest'
       })
     },
-    flash() {
+    flash () {
       ipcRenderer.send('flashTray', true)
     }
   }
