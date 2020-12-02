@@ -117,6 +117,7 @@ async function createWindow () {
 /**
  * 创建托盘
  */
+let isLeaveTray = null
 function createTray () {
   tray = new Tray(path.resolve(__static, 'logo.png'))
   const contextMenu = Menu.buildFromTemplate([
@@ -127,6 +128,14 @@ function createTray () {
         win.show()
       }
     }}),
+    new MenuItem({
+      label: '前置窗口',
+      type: 'checkbox',
+      checked: true,
+      click: (v) => {
+        win.setAlwaysOnTop(v.checked)
+      }
+    }),
     new MenuItem({
       label: '弹小框',
       click: () => {
@@ -150,6 +159,19 @@ function createTray () {
     } else {
       win.show()
     }
+  })
+
+  // 判断鼠标是否在托盘图标上
+  tray.on('mouse-move', (e) => {
+    isLeaveTray = false
+    const interval = setInterval(() => {
+      const trayBounds = tray.getBounds()
+      const point = screen.getCursorScreenPoint()
+      if(!(trayBounds.x < point.x && trayBounds.y < point.y && point.x < (trayBounds.x + trayBounds.width) && point.y < (trayBounds.y  + trayBounds.height))){
+        isLeaveTray = true
+        clearInterval(interval)
+      }
+    }, 100)
   })
 }
 /**
@@ -178,6 +200,7 @@ function flashTray (bool) {
  * 创建小窗口
  */
 function createChildWin () {
+  if (childWindow) return
   const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
   const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
   childWindow = new BrowserWindow({
@@ -269,6 +292,7 @@ if (!gotTheLock) {
 
 // window 系统中执行网页调起应用时，处理协议传入的参数
 const handleArgvFromWeb = (argv) => {
+  console.log(argv)
   const url = argv.find(v => v.indexOf(`${URLSCHEME}://`) !== -1)
   console.log(url)
   if (url) handleUrlFromWeb(url)
@@ -285,10 +309,17 @@ const handleUrlFromWeb = (urlStr) => {
   console.log(token)
 }
 
+// 打开弹框
+ipcMain.on('openChildWin', (e, arg) => {
+  createChildWin()
+})
+
+// 关闭弹框
 ipcMain.on('closeChildWin', (e, arg) => {
   closeChildWin()
 })
 
+// 开启闪动
 ipcMain.on('flashTray', (e, arg) => {
   flashTray(arg)
 })

@@ -1,7 +1,8 @@
 <template>
 <div>
   <template v-if="isElectron">
-    <button @click="open">open</button>
+    <button @click="openDialog">打开提示框</button>
+    <button @click="openWindow">打开新窗口</button>
   </template>
   <div class="home">
     this is home
@@ -28,14 +29,17 @@ export default {
   mounted () {
   },
   methods: {
-    open () {
+    openDialog () {
       Dialog.showMessageBoxSync({
         type: 'info',
         title: '测试弹框',
         message: 'testtesttesttesttest'
       })
     },
-    flash() {
+    openWindow () {
+      ipcRenderer.send('openChildWin')
+    },
+    flash () {
       ipcRenderer.send('flashTray', true)
     }
   }
