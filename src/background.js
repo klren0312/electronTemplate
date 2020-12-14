@@ -8,7 +8,8 @@ import {
   protocol,
   screen,
   BrowserWindow,
-  ipcMain
+  ipcMain,
+  session
 } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const path = require('path')
@@ -21,16 +22,16 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 // 设置调用协议
-// remove so we can register each time as we run the app. 
-app.removeAsDefaultProtocolClient(URLSCHEME);
+// remove so we can register each time as we run the app.
+app.removeAsDefaultProtocolClient(URLSCHEME)
 
 // If we are running a non-packaged version of the app && on windows
-if(process.env.NODE_ENV === 'development' && process.platform === 'win32') {
+if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
   // Set the path of electron.exe and your app.
   // These two additional parameters are only available on windows.
-  app.setAsDefaultProtocolClient(URLSCHEME, process.execPath, [path.resolve(process.argv[1])]);        
+  app.setAsDefaultProtocolClient(URLSCHEME, process.execPath, [path.resolve(process.argv[1])])
 } else {
-  app.setAsDefaultProtocolClient(URLSCHEME);
+  app.setAsDefaultProtocolClient(URLSCHEME)
 }
 
 // 窗口
@@ -56,6 +57,7 @@ async function createWindow () {
       nodeIntegration: true, // 渲染层可以使用node
       webSecurity: false // 跨域
     },
+    // eslint-disable-next-line no-undef
     icon: path.resolve(__static, 'logo.png')
   })
   win.setAlwaysOnTop(true)
@@ -117,17 +119,22 @@ async function createWindow () {
 /**
  * 创建托盘
  */
+// eslint-disable-next-line no-unused-vars
 let isLeaveTray = null
 function createTray () {
+  // eslint-disable-next-line no-undef
   tray = new Tray(path.resolve(__static, 'logo.png'))
   const contextMenu = Menu.buildFromTemplate([
-    new MenuItem({label: '显示主程序', click: () => {
-      if (win.isVisible()) {
-        win.focus()
-      } else {
-        win.show()
+    new MenuItem({
+      label: '显示主程序',
+      click: () => {
+        if (win.isVisible()) {
+          win.focus()
+        } else {
+          win.show()
+        }
       }
-    }}),
+    }),
     new MenuItem({
       label: '前置窗口',
       type: 'checkbox',
@@ -167,7 +174,7 @@ function createTray () {
     const interval = setInterval(() => {
       const trayBounds = tray.getBounds()
       const point = screen.getCursorScreenPoint()
-      if(!(trayBounds.x < point.x && trayBounds.y < point.y && point.x < (trayBounds.x + trayBounds.width) && point.y < (trayBounds.y  + trayBounds.height))){
+      if (!(trayBounds.x < point.x && trayBounds.y < point.y && point.x < (trayBounds.x + trayBounds.width) && point.y < (trayBounds.y + trayBounds.height))) {
         isLeaveTray = true
         clearInterval(interval)
       }
@@ -182,15 +189,18 @@ function flashTray (bool) {
   win.flashFrame(bool)
   if (!bool) {
     flashInterval && clearInterval(flashInterval)
+    // eslint-disable-next-line no-undef
     tray.setImage(path.resolve(__static, 'logo.png'))
     return
   }
   flashInterval && clearInterval(flashInterval)
   var count = 0
-  flashInterval = setInterval(function() {
-    if (count++ % 2 == 0) {
+  flashInterval = setInterval(function () {
+    if (count++ % 2 === 0) {
+      // eslint-disable-next-line no-undef
       tray.setImage(path.resolve(__static, 'empty.png'))
     } else {
+      // eslint-disable-next-line no-undef
       tray.setImage(path.resolve(__static, 'logo.png'))
     }
   }, 400)
@@ -199,7 +209,7 @@ function flashTray (bool) {
 /**
  * 创建小窗口
  */
-function createChildWin () {
+async function createChildWin () {
   if (childWindow) return
   const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
   const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
@@ -216,13 +226,22 @@ function createChildWin () {
       nodeIntegration: true
     },
     skipTaskbar: true,
+    // eslint-disable-next-line no-undef
     icon: path.resolve(__static, 'logo.png')
   })
-  const url = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:11111'
-    : `file://${__dirname}/index.html`
-  childWindow.loadURL(url + '/#/single')
   childWindow.setAlwaysOnTop(true) // 放在顶层固定
+
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    // Load the url of the dev server if in development mode
+    await childWindow.loadURL(
+      process.env.WEBPACK_DEV_SERVER_URL + '/#/single'
+    )
+    // 开发模式开启开发者工具
+    // if (!process.env.IS_TEST) childWindow.webContents.openDevTools()
+  } else {
+    // Load the index.html when not in development
+    childWindow.loadURL('app://./index.html' + '/#/single')
+  }
 }
 
 /**
@@ -255,12 +274,8 @@ app.on('activate', () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    // try {
-    //   await installExtension(VUEJS_DEVTOOLS)
-    // } catch (e) {
-    //   console.error('Vue Devtools failed to install:', e.toString())
-    // }
+    // 使用本地的vue开发者工具
+    session.defaultSession.loadExtension(path.resolve('vueDevtool'))
   }
   createWindow()
   createTray()
@@ -274,7 +289,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', (event, argv) => {
     if (process.platform === 'win32') {
-      console.log("window 准备执行网页端调起客户端逻辑")
+      console.log('window 准备执行网页端调起客户端逻辑')
       if (win) {
         if (win.isMinimized()) {
           win.restore()
