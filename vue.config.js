@@ -5,6 +5,7 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
+      productName: '软件名称',
       nodeIntegration: true,
       fileAssociations: {
         protocols: ['testapp']
