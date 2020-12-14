@@ -14,11 +14,12 @@ module.exports = {
         win: {
           target: [
             {
-              target: 'nsis',
-              arch: [
-                'ia32',
-                'x64'
-              ]
+              target: 'nsis', // 打包安装包
+              arch: ['ia32', 'x64'] // windows 32位 和 64位
+            },
+            {
+              target: 'portable', // 打包单文件
+              arch: ['ia32', 'x64'] // windows 32位 和 64位
             }
           ]
         },
