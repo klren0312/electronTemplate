@@ -82,7 +82,7 @@ async function createWindow () {
   // 窗口最小化触发
   win.on('minimize', () => {
     console.log('最小化')
-    createChildWin()
+    setTimeout(() => createChildWin(), 400)
   })
 
   win.on('focus', () => {
@@ -94,7 +94,7 @@ async function createWindow () {
   // 窗口隐藏, 任务栏没有图标
   win.on('hide', () => {
     console.log('隐藏')
-    createChildWin()
+    setTimeout(() => createChildWin(), 400)
   })
 
   win.on('show', () => {
@@ -145,7 +145,7 @@ function createTray () {
     new MenuItem({
       label: '弹小框',
       click: () => {
-        createChildWin()
+        setTimeout(() => createChildWin(), 400)
       }
     }),
     new MenuItem({
