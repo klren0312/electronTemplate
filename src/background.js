@@ -55,7 +55,8 @@ async function createWindow () {
     y: screenHeight - 600,
     webPreferences: {
       nodeIntegration: true, // 渲染层可以使用node
-      webSecurity: false // 跨域
+      webSecurity: false, // 跨域
+      enableRemoteModule: true // 可以使用remote
     },
     // eslint-disable-next-line no-undef
     icon: path.resolve(__static, 'logo.png')
@@ -223,7 +224,8 @@ async function createChildWin () {
     transparent: true, // 透明
     maximizable: false, // 不可缩放
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true // 可以使用remote
     },
     skipTaskbar: true,
     // eslint-disable-next-line no-undef
