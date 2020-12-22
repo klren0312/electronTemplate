@@ -46,13 +46,11 @@ let childWindow = null
 async function createWindow () {
   Menu.setApplicationMenu(null) // 隐藏菜单
   // Create the browser window.
-  const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
-  const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
   win = new BrowserWindow({
-    width: 330,
-    height: 600,
-    x: screenWidth - 330,
-    y: screenHeight - 600,
+    width: 500,
+    height: 400,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true, // 渲染层可以使用node
       webSecurity: false, // 跨域
@@ -279,8 +277,12 @@ app.on('ready', async () => {
     // 使用本地的vue开发者工具
     session.defaultSession.loadExtension(path.resolve('vueDevtool'))
   }
-  createWindow()
-  createTray()
+  // 处理透明背景后, 出现黑边问题, 加个延时
+  // https://github.com/electron/electron/issues/15947#issuecomment-571136404
+  setTimeout(() => {
+    createWindow()
+    createTray()
+  }, 400)
 })
 
 // 只允许单个实例
@@ -326,9 +328,24 @@ const handleUrlFromWeb = (urlStr) => {
   console.log(token)
 }
 
+// 最小化主界面
+ipcMain.on('minimize', () => {
+  win.minimize()
+})
+
+// 主界面
+ipcMain.on('close', (e, arg) => {
+  isQuit = arg
+  if (arg) {
+    app.exit() // 真实退出
+  } else {
+    win.hide() // 缩小到托盘
+  }
+})
+
 // 打开弹框
 ipcMain.on('openChildWin', (e, arg) => {
-  createChildWin()
+  setTimeout(() => createChildWin(), 400)
 })
 
 // 关闭弹框
