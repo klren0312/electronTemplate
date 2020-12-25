@@ -57,6 +57,12 @@ if (process.env.WEBPACK_DEV_SERVER_URL) {
 ```
 
 ### 2. 开发模式如果打开窗口时, 若开启了开发者工具, 想关闭窗口, 需要先把开发者工具关闭, 才能正常关闭窗口
+在窗口关闭前, 判断开发者工具是否开启, 若开启则先关闭开发者工具, 例如
+```js
+if (callWin.isDevToolsOpened()) {
+  callWin.closeDevTools()
+}
+```
 
 ### 3. 修改logo
 替换`public/icon.png`, 然后执行
@@ -76,10 +82,39 @@ path.resolve(__static, 'icon.png')
 ### 4. 透明无边框窗口, 接触到屏幕边缘会出现黑色边框问题
 >https://github.com/electron/electron/issues/15947#issuecomment-571136404
 
-需要在创建窗口时添加延时, 例如,
+需要在创建窗口时添加延时, 例如
 ```js
+app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('disable-gpu')
+app.commandLine.appendSwitch('disable-software-rasterizer')
 setTimeout(() => createWindow(), 400)
 ```
+win7需要选择为aero主题, 透明背景才能生效
 
-### 5. 按需引入ElementUI
+**注意(2020.12.23):**win7虚拟机上, 开启aero主题会卡顿, 基本使用不了
+
+### 5. 透明无边框窗口, 当关闭开发者工具时, 背景会变白色问题
+> https://github.com/electron/electron/issues/10420#issuecomment-329964500
+
+当关闭开发者工具时, 会重新创建一个新的渲染视图, 所以会使用配置的背景颜色, 如果没配置会使用默认值白色
+所以需要在窗口创建时设置`backgroundColor`属性为`#00000000`
+
+
+### 6. 按需引入ElementUI
 在`src\assets\elementui\elementUI.js`文件中, 进行操作
+
+### 7. 渲染进程获取主进程环境变量
+> https://github.com/electron/electron/issues/5224#issuecomment-212279369
+
+```js
+const { remote } = require('electron')
+const envData = remote.getGlobal('process').env
+```
+### 8. 打包时, 报错asar文件被占用
+vscode可以再setting.json里配置忽略`dist_electron`文件夹
+
+```json
+"files.exclude": {
+  "dist_electron": true,
+}
+```
