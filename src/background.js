@@ -21,6 +21,16 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+// V1.8.7 版本
+// protocol.registerStandardSchemes(['app'], {
+//   secure: true
+// })
+
+// 禁用硬件加速, 防止透明框黑边
+app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('disable-gpu')
+app.commandLine.appendSwitch('disable-software-rasterizer')
+
 // 设置调用协议
 // remove so we can register each time as we run the app.
 app.removeAsDefaultProtocolClient(URLSCHEME)
@@ -51,6 +61,7 @@ async function createWindow () {
     height: 400,
     frame: false,
     transparent: true,
+    backgroundColor: '#00000000', // 当关闭开发者工具时, 会重新创建一个新的渲染视图, 所以会使用配置的背景颜色, 如果没配置会使用默认值白色
     webPreferences: {
       nodeIntegration: true, // 渲染层可以使用node
       webSecurity: false, // 跨域
@@ -221,6 +232,7 @@ async function createChildWin () {
     frame: false, // 无外框架
     transparent: true, // 透明
     maximizable: false, // 不可缩放
+    backgroundColor: '#00000000', // 当关闭开发者工具时, 会重新创建一个新的渲染视图, 所以会使用配置的背景颜色, 如果没配置会使用默认值白色
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true // 可以使用remote
@@ -276,6 +288,9 @@ app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // 使用本地的vue开发者工具
     session.defaultSession.loadExtension(path.resolve('vueDevtool'))
+
+    // V1.8.7
+    // BrowserWindow.addExtension(path.resolve('vueDevtool'))
   }
   // 处理透明背景后, 出现黑边问题, 加个延时
   // https://github.com/electron/electron/issues/15947#issuecomment-571136404
@@ -308,6 +323,24 @@ if (!gotTheLock) {
     }
   })
 }
+
+// V1.8.7
+// const gotTheLock = app.makeSingleInstance(() => {
+//   if (win) {
+//     if (win.isMinimized()) {
+//       win.restore()
+//     }
+//     if (win.isVisible()) {
+//       win.focus()
+//     } else {
+//       win.show()
+//     }
+//   }
+// })
+
+// if (gotTheLock) {
+//   app.quit()
+// }
 
 // window 系统中执行网页调起应用时，处理协议传入的参数
 const handleArgvFromWeb = (argv) => {

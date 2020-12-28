@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     openDialog () {
-      Dialog.showMessageBoxSync({
+      Dialog.showMessageBox({
         type: 'info',
         title: '测试弹框',
         message: 'testtesttesttesttest'
