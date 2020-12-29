@@ -160,6 +160,13 @@ function createTray () {
       }
     }),
     new MenuItem({
+      label: '检测更新',
+      click: () => {
+        const checkForUpdates = require('@/updater')
+        checkForUpdates()
+      }
+    }),
+    new MenuItem({
       label: '退出程序',
       click: () => {
         isQuit = true

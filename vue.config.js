@@ -24,6 +24,12 @@ module.exports = {
             }
           ]
         },
+        publish: [
+          {
+            provider: 'generic',
+            url: 'http://127.0.0.1:5000'
+          }
+        ],
         nsis: {
           oneClick: false, // 一键安装
           perMachine: true, // 为所有用户安装

@@ -23,7 +23,7 @@ export default {
       ipcRenderer.send('minimize')
     },
     closeHandle () {
-      ipcRenderer.send('close', true)
+      ipcRenderer.send('close', false)
     }
   }
 }

@@ -17,7 +17,7 @@ app.get('/checkAuth', function (req, res) {
   })
 })
 
-// 端口：18888
-var server = app.listen(18888, function () {
-  console.log('127.0.0.1:18888')
+// 端口：18848
+app.listen(18848, function () {
+  console.log('127.0.0.1:18848')
 })
