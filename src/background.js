@@ -93,7 +93,6 @@ async function createWindow () {
   // 窗口最小化触发
   win.on('minimize', () => {
     console.log('最小化')
-    setTimeout(() => createChildWin(), 400)
   })
 
   win.on('focus', () => {
@@ -105,7 +104,6 @@ async function createWindow () {
   // 窗口隐藏, 任务栏没有图标
   win.on('hide', () => {
     console.log('隐藏')
-    setTimeout(() => createChildWin(), 400)
   })
 
   win.on('show', () => {
@@ -131,6 +129,7 @@ async function createWindow () {
  */
 // eslint-disable-next-line no-unused-vars
 let isLeaveTray = null
+
 function createTray () {
   // eslint-disable-next-line no-undef
   tray = new Tray(path.resolve(__static, 'logo.png'))
@@ -161,9 +160,10 @@ function createTray () {
     }),
     new MenuItem({
       label: '检测更新',
-      click: () => {
-        const checkForUpdates = require('@/updater')
-        checkForUpdates()
+      click: async () => {
+        const Updater = require('@/updater')
+        const updaterInstance = new Updater('http://localhost:5000')
+        updaterInstance.checkForUpdates()
       }
     }),
     new MenuItem({
