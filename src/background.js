@@ -31,6 +31,11 @@ app.disableHardwareAcceleration()
 app.commandLine.appendSwitch('disable-gpu')
 app.commandLine.appendSwitch('disable-software-rasterizer')
 
+// 更新检测用
+const Updater = require('@/updater')
+const updaterInstance = new Updater('http://localhost:5000')
+updaterInstance.init()
+
 // 设置调用协议
 // remove so we can register each time as we run the app.
 app.removeAsDefaultProtocolClient(URLSCHEME)
@@ -161,9 +166,7 @@ function createTray () {
     new MenuItem({
       label: '检测更新',
       click: async (e) => {
-        const Updater = require('@/updater')
-        const updaterInstance = new Updater('http://localhost:5000', contextMenu)
-        updaterInstance.checkForUpdates()
+        updaterInstance.checkForUpdates(contextMenu)
       }
     }),
     new MenuItem({

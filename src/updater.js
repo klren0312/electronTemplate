@@ -6,10 +6,10 @@ class Updater {
    * 构造函数
    * @param {String} checkUrl 更新地址
    */
-  constructor (checkUrl, menu) {
+  constructor (checkUrl) {
     this.url = checkUrl
     this.updateWindow = null
-    this.menu = menu
+    this.menu = null
   }
 
   /**
@@ -64,7 +64,8 @@ class Updater {
   /**
    * 开始检测更新
    */
-  async checkForUpdates () {
+  async checkForUpdates (menu) {
+    this.menu = menu
     this.updateWindow = new BrowserWindow({
       width: 200,
       height: 150,
@@ -93,7 +94,6 @@ class Updater {
       // Load the index.html when not in development
       this.updateWindow.loadURL('app://./index.html' + '/#/update')
     }
-    this.init()
     autoUpdater.checkForUpdates()
   }
 }
