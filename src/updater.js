@@ -26,6 +26,7 @@ class Updater {
         type: 'info',
         title: '软件更新',
         message: '发现新版本, 是否现在更新?',
+        cancelId: 233,
         buttons: ['是', '否']
       })
       if (isUpdate === 0) {
