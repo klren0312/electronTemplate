@@ -118,3 +118,34 @@ vscode可以再setting.json里配置忽略`dist_electron`文件夹
   "dist_electron": true,
 }
 ```
+
+### 9. 软件更新
+使用`electron-updater`
+
+1) 配置`vue.config.js`
+设置`publish`配置, 配置了这个配置后, 打包后会生成一个`latest.yml`文件, 需要将其和安装包放在服务器同一目录下, `url`配置成服务器可以访问到这个目录的url, 也可以使用`autoUpdater.setFeedURL(url)`动态配置url
+
+```js
+pluginOptions: {
+  electronBuilder: {
+    builderOptions: {
+      publish: [
+        {
+          provider: 'generic',
+          url: 'http://127.0.0.1:5000'
+        }
+      ]
+    }
+  }
+}
+```
+
+2) 类似示例
+https://github.com/electron-userland/electron-builder/blob/docs/encapsulated%20manual%20update%20via%20menu.js
+
+## 参考文档
+1. [vue-cli配置](https://cli.vuejs.org/config/)
+2. [electron api文档](https://www.electronjs.org/docs/api)
+3. [vue-cli-plugin-electron-builder](https://github.com/nklayman/vue-cli-plugin-electron-builder)
+4. [electron-build文档](https://www.electron.build/)
+5. [electron-updater文档](https://www.electron.build/auto-update.html)
