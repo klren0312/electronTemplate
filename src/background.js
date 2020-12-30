@@ -160,9 +160,9 @@ function createTray () {
     }),
     new MenuItem({
       label: '检测更新',
-      click: async () => {
+      click: async (e) => {
         const Updater = require('@/updater')
-        const updaterInstance = new Updater('http://localhost:5000')
+        const updaterInstance = new Updater('http://localhost:5000', contextMenu)
         updaterInstance.checkForUpdates()
       }
     }),

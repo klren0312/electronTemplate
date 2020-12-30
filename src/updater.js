@@ -6,9 +6,10 @@ class Updater {
    * 构造函数
    * @param {String} checkUrl 更新地址
    */
-  constructor (checkUrl) {
+  constructor (checkUrl, menu) {
     this.url = checkUrl
     this.updateWindow = null
+    this.menu = menu
   }
 
   /**
@@ -30,6 +31,7 @@ class Updater {
         buttons: ['是', '否']
       })
       if (isUpdate === 0) {
+        this.menu.items[3].enabled = false
         autoUpdater.downloadUpdate()
         this.updateWindow.show()
       }
@@ -45,6 +47,7 @@ class Updater {
     autoUpdater.on('update-downloaded', () => {
       this.updateWindow.close()
       this.updateWindow = null
+      this.menu.items[3].enabled = true
       dialog.showMessageBox({
         title: '安装更新',
         message: '更新已下载, 需要退出程序进行更新'
