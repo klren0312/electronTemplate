@@ -39,8 +39,6 @@ class Updater {
         title: '暂无更新',
         message: '当前版本为最新版本'
       })
-      // updater.enabled = true
-      // updater = null
     })
 
     autoUpdater.on('update-downloaded', () => {
