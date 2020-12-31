@@ -165,7 +165,7 @@ function createTray () {
     }),
     new MenuItem({
       label: '检测更新',
-      click: async (e) => {
+      click: () => {
         updaterInstance.checkForUpdates(contextMenu)
       }
     }),
