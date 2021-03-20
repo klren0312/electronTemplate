@@ -11,7 +11,8 @@ module.exports = {
         protocols: ['testapp']
       },
       builderOptions: {
-        asar: false,
+        asar: true,
+        "afterPack": "./myAfterPackHook.js",
         win: {
           target: [
             {
