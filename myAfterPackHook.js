@@ -9,7 +9,7 @@ exports.default = async ({ appOutDir, packager, outDir }) => {
     const asarmor = new Asarmor(asarPath)
     asarmor.applyProtection(new FileCrash('background.js.LICENSE.txt'))
     asarmor.applyProtection(new Trashify(['.git', '.env']))
-    asarmor.write(asarPath)
+    await asarmor.write(asarPath)
 
     // 由于当前版本asarmor无法进行同步进行, 所以增量更新的包是没被asarmor修改的asar包
     const targetPath = join(appOutDir, './resources')
